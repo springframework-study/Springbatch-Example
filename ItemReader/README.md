@@ -17,7 +17,7 @@ ItemReader의 구현체들이 어떻게 되어있는지 살펴보면<br/>
 JdbcPagingItemReader가 있습니다.<br/>
 해당 클래스의 계층 구조를 살펴보면 다음과 같습니다.<br/>
 
-![JdbcPagingItemReader](./image/JdbcPagingItemReader.png)
+![JdbcPagingItemReader](../image/JdbcPagingItemReader.png)
 
 ItemReader외에 ItemStream 인터페이스도 같이 구현되어 있습니다. <br/>
 먼저 ItemReader를 살펴보면 read()만 가지고 있습니다.
