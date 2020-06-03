@@ -80,4 +80,30 @@ CursorItemReader는 Paging과 다르게 Streaming으로 데이터를 처리합�
 JSP나 Servlet으로 게시판을 작성해보신 분들은 ResultSet을 사용해서 next()로 하나씩 데이터를 가져왔던 것을 기억하시면 됩니다.
 
 
+### JdbcCursorItemReader
+JdbcCursorItemReader의 설정값들은 다음과 같은 역할을 합니다.
++ chunk
+    + chunkSize로 인자값을 넣은 경우는 Reader & Writer가 묶일 Chunk 트랜잭션 범위입니다.
+    
++ fetchSize
+    + Database에서 한번에 가져올 데이터 양을 나타냅니다.
+    + Paging과는 다를 것이, Paging은 실제 쿼리를 limit, offset을 이용해서 분할 처리하는 반면 Cursor는 쿼리는 분할 처리 없이<br/>
+      실행되나 내부적으로 가져오는 데이터는 FetchSize만큼 가져와 read()를 통해서 하나씩 가져옵니다.
+      
+
++ dataSource
+    + Database에 접근하기 위해 사용할 Datasource 객체를 할당합니다.
+    
++ rowMapper
+    + 쿼리 결과를 Java 인스턴스로 매핑하기 위한 Mapper입니다.
+    + 커스텀하게 생성해서 사용할 수 있지만, 이렇게 될 경우 매번 Mapper클래스를 생성해야 되서 보편적으로 Spring에서 공식적으로<br/>
+      지원하는 BeanPropertyRowMapper.class를 많이 사용합니다.
+      
++ sql
+    + Reader로 사용할 쿼리문을 사용하시면 됩니다.
+    
++ name
+    + reader의 이름을 지정합니다.
+    + Bean의 이름이 아니며 Spring Batch의 ExecutionContext에서 저장되어질 이름입니다.
+
 
