@@ -17,7 +17,7 @@ ItemReader의 구현체들이 어떻게 되어있는지 살펴보면<br/>
 JdbcPagingItemReader가 있습니다.<br/>
 해당 클래스의 계층 구조를 살펴보면 다음과 같습니다.<br/>
 
-![JdbcPagingItemReader](../image/JdbcPagingItemReader.PNG)
+![JdbcPagingItemReader](../image/JdbcPagingItemReader_2.PNG)
 
 ItemReader외에 ItemStream 인터페이스도 같이 구현되어 있습니다. <br/>
 먼저 ItemReader를 살펴보면 read()만 가지고 있습니다.
@@ -106,4 +106,29 @@ JdbcCursorItemReader의 설정값들은 다음과 같은 역할을 합니다.
     + reader의 이름을 지정합니다.
     + Bean의 이름이 아니며 Spring Batch의 ExecutionContext에서 저장되어질 이름입니다.
 
+
+ItemReadr의 가장 큰 장점은 데이터를 Streaming 할 수 있다는 것입니다.<br/>
+read()메소드는 데이터를 하나씩 가져와 ItemWriter로 데이터를 전달하고, 다음 데이터를 다시 가져 옵니다.<br/>
+이를 통해 reader & processor & writer가 Chunk 단위로 수행되고 주기적으로 Commit됩니다.<br/>
+이는 고성능의 배치 처리에서는 핵심입니다.<br/>
+
+
+### CursorItemReader의 주의 사항
+CursorItemReader를 사용하실때는 Database와 SocketTimeout을 충분히 큰 값으로 설정해야만 합니다.<br/>
+Cursor는 하나의 Connection으로 Batch가 끝날때까지 사용되기 때문에 Batch가 끝나기전에 Database와 어플리케이션의 Connection이 먼저 끊어질수 있습니다.<br/>
+그래서 Batch 수행 시간이 오래 걸리는 경우에는 PagingItemReader를 사용하시는게 낫습니다.<br/>
+Paging의 경우 한 페이지를 읽을때마다 Connection을 맺고 끊기 때문에 아무리 많은 데이터라도 타임아웃과 부하 없이 수행될 수 있습니다.
+
+
+# PagingItemREader
+Database Cursor를 사용하는 대신 여러 쿼리를 실행하여 각 쿼리가 결과의 일부를 가져 오는 방법도 있습니다.<br/>
+이런 처리 방법을 Paging이라고합니다.<br/>
+게시판의 페이징을 구현해보신 분들은 아시겠지만 페이징을 한다는 것은 각 쿼리에 시작 행 번호(offset)와 페이지에서 반환 할 행 수 (limit)를 지정해야함을 의미합니다.<br/>
+Spring Batch에서는 offset과 limit을 PageSize에 맞게 자동으로 생성해 줍니다.<br/>
+다만 각 쿼리는 개별적으로 실행한다는 점을 유의해야합니다.<br/>
+각 페이지마다 새로운 쿼리를 실행하므로 페이징시 결과를 정렬하는 것이 중요합니다.<br/>
+데이터 결과의 순서가 보장될 수 있도록 order by가 권장됩니다.
+
+### JdbcPagingItemReader
+JdbcCursorItemReader와 설정이 크게 다른것이 하나 있습니다.<br/>
 
