@@ -120,7 +120,7 @@ Cursor는 하나의 Connection으로 Batch가 끝날때까지 사용되기 때�
 Paging의 경우 한 페이지를 읽을때마다 Connection을 맺고 끊기 때문에 아무리 많은 데이터라도 타임아웃과 부하 없이 수행될 수 있습니다.
 
 
-# PagingItemREader
+# PagingItemReader
 Database Cursor를 사용하는 대신 여러 쿼리를 실행하여 각 쿼리가 결과의 일부를 가져 오는 방법도 있습니다.<br/>
 이런 처리 방법을 Paging이라고합니다.<br/>
 게시판의 페이징을 구현해보신 분들은 아시겠지만 페이징을 한다는 것은 각 쿼리에 시작 행 번호(offset)와 페이지에서 반환 할 행 수 (limit)를 지정해야함을 의미합니다.<br/>
@@ -131,4 +131,20 @@ Spring Batch에서는 offset과 limit을 PageSize에 맞게 자동으로 생성�
 
 ### JdbcPagingItemReader
 JdbcCursorItemReader와 설정이 크게 다른것이 하나 있습니다.<br/>
+바로 쿼리 createQueryProvider()입니다.<br/>
+JdbcCursorItemReader를 사용할 때는 단순히 String 타입으로 쿼리를 생성했지만, PagingItemReader에서는 PagingQueryProvider를<br/>
+통해 쿼리를 생성합니다. 이렇게 사용하는데는 큰 이유가 있습니다.
+<br/>
+각 Database에는 Paging을 지원하는 자체적인 전략들이 있습니다.<br/>
+때문에 Spring Batch에는 각 Database의 Paging 전략에 맞춰 구현되어야만 합니다.<br/>
+그래서 아래와 같이 각 Database에 맞는 Provider들이 존재하는데요.</br>
+![Provider](../image/provider.PNG)
 
+그래서 Spring Batch에서는 SqlPagingQueryProviderFactoryBean을 통해 Datasource 설정값을 보고<br/>
+위 이미지에서 작성된 Provider중 하나를 자동으로 선택하도록 합니다.<br/>
+이렇게 하면 코드 변경 사항이 적어서 Spring Batch에서 공식 지원하는 방법입니다.<br/>
+이와 다른 설정들의 값은 JdbcCursorItemReader와 크게 다르지 않습니다.
++ parameterValues
+    + 쿼리에 대한 매개 변수 값의 Map을 지정합니다.
+    + queryProvider.setWhereClause을 보시면 어떻게 변수를 사용하는지 자세히 알 수 있습니다.
+    + where 절에서 선언된 파라미터 변수명과 parameterValues에서 선언된 파라미터 변수명이 일치해야만 합니다.
